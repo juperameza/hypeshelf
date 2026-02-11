@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og.png",
+        url: "/og.jpg",
         width: 1200,
         height: 630,
         alt: "HypeShelf",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
       "Collect and share the stuff you're hyped about. A shared recommendations shelf for friends.",
     images: [
       {
-        url: "https://hypeshelf-mu.vercel.app/og.png",
+        url: "https://hypeshelf-mu.vercel.app/og.jpg",
         width: 1200,
         height: 630,
         alt: "HypeShelf",
