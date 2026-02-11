@@ -12,11 +12,13 @@ import styles from "./RecommendationCard.module.scss";
 interface RecommendationCardProps {
   recommendation: Recommendation;
   showActions?: boolean;
+  showUserInfo?: boolean;
 }
 
 export function RecommendationCard({
   recommendation,
   showActions = true,
+  showUserInfo = true,
 }: RecommendationCardProps) {
   const { user } = useUser();
   const { role } = useUserRole();
@@ -61,7 +63,9 @@ export function RecommendationCard({
 
   return (
     <div
-      className={`${styles.card} ${recommendation.isStaffPick ? styles.staffPick : ""}`}
+      className={`${styles.card} ${recommendation.isStaffPick ? styles.staffPick : ""} ${
+        showUserInfo ? "" : styles.publicCard
+      }`}
     >
       {recommendation.isStaffPick && (
         <div className={styles.staffPickBadge}>
@@ -69,28 +73,42 @@ export function RecommendationCard({
         </div>
       )}
 
-      <div className={styles.header}>
-        <div className={styles.userInfo}>
-          {recommendation.userImage ? (
-            <img
-              src={recommendation.userImage}
-              alt={recommendation.userName}
-              className={styles.avatar}
-            />
-          ) : (
-            <div className={styles.avatarPlaceholder}>
-              {recommendation.userName.charAt(0).toUpperCase()}
-            </div>
-          )}
-          <span className={styles.userName}>{recommendation.userName}</span>
+      {showUserInfo ? (
+        <div className={styles.header}>
+          <div className={styles.userInfo}>
+            {recommendation.userImage ? (
+              <img
+                src={recommendation.userImage}
+                alt={recommendation.userName}
+                className={styles.avatar}
+              />
+            ) : (
+              <div className={styles.avatarPlaceholder}>
+                {recommendation.userName.charAt(0).toUpperCase()}
+              </div>
+            )}
+            <span className={styles.userName}>{recommendation.userName}</span>
+          </div>
+          <span
+            className={styles.genreBadge}
+            style={{ backgroundColor: GENRE_COLORS[recommendation.genre] }}
+          >
+            {recommendation.genre.toUpperCase()}
+          </span>
         </div>
-        <span
-          className={styles.genreBadge}
-          style={{ backgroundColor: GENRE_COLORS[recommendation.genre] }}
-        >
-          {recommendation.genre.toUpperCase()}
-        </span>
-      </div>
+      ) : (
+        <div className={styles.publicHeader}>
+          <span
+            className={styles.genreBadge}
+            style={{ backgroundColor: GENRE_COLORS[recommendation.genre] }}
+          >
+            {recommendation.genre.toUpperCase()}
+          </span>
+          <span className={styles.publicDate}>
+            {formatDate(recommendation.createdAt)}
+          </span>
+        </div>
+      )}
 
       <div className={styles.content}>
         <a
@@ -104,55 +122,57 @@ export function RecommendationCard({
         <p className={styles.blurb}>{recommendation.blurb}</p>
       </div>
 
-      <div className={styles.footer}>
-        <span className={styles.date}>{formatDate(recommendation.createdAt)}</span>
+      {showUserInfo && (
+        <div className={styles.footer}>
+          <span className={styles.date}>{formatDate(recommendation.createdAt)}</span>
 
-        {showActions && (canDelete || canToggle) && (
-          <div className={styles.actions}>
-            {canToggle && (
-              <button
-                onClick={handleToggleStaffPick}
-                className={styles.staffPickButton}
-                title={
-                  recommendation.isStaffPick
-                    ? "Remove Staff Pick"
-                    : "Mark as Staff Pick"
-                }
-              >
-                {recommendation.isStaffPick ? "★ Unmark" : "☆ Mark Pick"}
-              </button>
-            )}
-
-            {canDelete && !showDeleteConfirm && (
-              <button
-                onClick={() => setShowDeleteConfirm(true)}
-                className={styles.deleteButton}
-              >
-                Delete
-              </button>
-            )}
-
-            {canDelete && showDeleteConfirm && (
-              <div className={styles.confirmDelete}>
-                <span>Delete?</span>
+          {showActions && (canDelete || canToggle) && (
+            <div className={styles.actions}>
+              {canToggle && (
                 <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className={styles.confirmYes}
+                  onClick={handleToggleStaffPick}
+                  className={styles.staffPickButton}
+                  title={
+                    recommendation.isStaffPick
+                      ? "Remove Staff Pick"
+                      : "Mark as Staff Pick"
+                  }
                 >
-                  {isDeleting ? "..." : "Yes"}
+                  {recommendation.isStaffPick ? "★ Unmark" : "☆ Mark Pick"}
                 </button>
+              )}
+
+              {canDelete && !showDeleteConfirm && (
                 <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className={styles.confirmNo}
+                  onClick={() => setShowDeleteConfirm(true)}
+                  className={styles.deleteButton}
                 >
-                  No
+                  Delete
                 </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
+              )}
+
+              {canDelete && showDeleteConfirm && (
+                <div className={styles.confirmDelete}>
+                  <span>Delete?</span>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className={styles.confirmYes}
+                  >
+                    {isDeleting ? "..." : "Yes"}
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    className={styles.confirmNo}
+                  >
+                    No
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

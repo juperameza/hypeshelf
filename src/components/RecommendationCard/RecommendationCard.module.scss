@@ -43,6 +43,25 @@
   margin-bottom: 1rem;
 }
 
+.publicHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.publicDate {
+  font-size: 0.75rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+.publicCard {
+  .content {
+    margin-bottom: 0;
+  }
+}
+
 .userInfo {
   display: flex;
   align-items: center;

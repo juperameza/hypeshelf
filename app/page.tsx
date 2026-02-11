@@ -1,6 +1,7 @@
 import { Header } from "@/src/components/Header/Header";
 import { PublicRecommendationsList } from "@/src/components/PublicRecommendationsList/PublicRecommendationsList";
-import { SignInButton } from "@clerk/nextjs";
+import { RecommendationsList } from "@/src/components/RecommendationsList/RecommendationsList";
+import { SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import styles from "./page.module.scss";
 
 export default function HomePage() {
@@ -17,17 +18,27 @@ export default function HomePage() {
             Join your friends in building the ultimate recommendation shelf.
             Movies, shows, books, podcasts – if it's worth the hype, add it here.
           </p>
-          <SignInButton mode="modal">
-            <button className={styles.ctaButton}>
-              Sign in to add yours
-            </button>
-          </SignInButton>
+          <SignedOut>
+            <SignInButton mode="modal">
+              <button className={styles.ctaButton}>
+                Sign in to add yours
+              </button>
+            </SignInButton>
+          </SignedOut>
         </section>
 
-        <section className={styles.preview}>
-          <h2 className={styles.previewTitle}>Latest Recommendations</h2>
-          <PublicRecommendationsList limit={6} />
-        </section>
+        <SignedIn>
+          <section className={styles.preview}>
+            <RecommendationsList />
+          </section>
+        </SignedIn>
+
+        <SignedOut>
+          <section className={styles.preview}>
+            <h2 className={styles.previewTitle}>Latest Recommendations</h2>
+            <PublicRecommendationsList limit={6} />
+          </section>
+        </SignedOut>
       </main>
     </div>
   );

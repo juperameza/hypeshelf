@@ -1,5 +1,6 @@
 "use client";
 
+import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { RecommendationCard } from "../RecommendationCard/RecommendationCard";
@@ -34,13 +35,26 @@ export function PublicRecommendationsList({ limit = 6 }: PublicRecommendationsLi
 
   return (
     <div className={styles.grid}>
-      {recommendations.map((rec) => (
-        <RecommendationCard
-          key={rec._id}
-          recommendation={rec as Recommendation}
-          showActions={false}
-        />
-      ))}
+      <SignedIn>
+        {recommendations.map((rec) => (
+          <RecommendationCard
+            key={rec._id}
+            recommendation={rec as Recommendation}
+            showActions={false}
+            showUserInfo={true}
+          />
+        ))}
+      </SignedIn>
+      <SignedOut>
+        {recommendations.map((rec) => (
+          <RecommendationCard
+            key={rec._id}
+            recommendation={rec as Recommendation}
+            showActions={false}
+            showUserInfo={false}
+          />
+        ))}
+      </SignedOut>
     </div>
   );
 }
