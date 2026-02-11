@@ -8,14 +8,30 @@ import { RecommendationCard } from "../RecommendationCard/RecommendationCard";
 import { Genre, Recommendation } from "../../types";
 import styles from "./RecommendationsList.module.scss";
 
+const PAGE_SIZE = 6;
+
 export function RecommendationsList() {
   const [selectedGenre, setSelectedGenre] = useState<Genre | "all">("all");
   const [staffPicksOnly, setStaffPicksOnly] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const recommendations = useQuery(api.recommendations.getAllRecommendations, {
     genre: selectedGenre === "all" ? undefined : selectedGenre,
     staffPicksOnly,
   });
+
+  const handleGenreChange = (genre: Genre | "all") => {
+    setSelectedGenre(genre);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const handleStaffPicksChange = (value: boolean) => {
+    setStaffPicksOnly(value);
+    setVisibleCount(PAGE_SIZE);
+  };
+
+  const visibleRecommendations = recommendations?.slice(0, visibleCount);
+  const remaining = recommendations ? recommendations.length - visibleCount : 0;
 
   return (
     <section className={styles.recommendationsSection}>
@@ -23,9 +39,9 @@ export function RecommendationsList() {
 
       <FilterBar
         selectedGenre={selectedGenre}
-        onGenreChange={setSelectedGenre}
+        onGenreChange={handleGenreChange}
         staffPicksOnly={staffPicksOnly}
-        onStaffPicksChange={setStaffPicksOnly}
+        onStaffPicksChange={handleStaffPicksChange}
       />
 
       {recommendations === undefined ? (
@@ -44,15 +60,25 @@ export function RecommendationsList() {
           )}
         </div>
       ) : (
-        <div className={styles.grid}>
-          {recommendations.map((rec) => (
-            <RecommendationCard
-              key={rec._id}
-              recommendation={rec as Recommendation}
-              showActions={true}
-            />
-          ))}
-        </div>
+        <>
+          <div className={styles.grid}>
+            {visibleRecommendations!.map((rec) => (
+              <RecommendationCard
+                key={rec._id}
+                recommendation={rec as Recommendation}
+                showActions={true}
+              />
+            ))}
+          </div>
+          {remaining > 0 && (
+            <button
+              className={styles.showMore}
+              onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            >
+              Show More ({remaining} remaining)
+            </button>
+          )}
+        </>
       )}
     </section>
   );

@@ -77,9 +77,6 @@ export function RecommendationForm() {
       setLink("");
       setBlurb("");
       setSuccess(true);
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create recommendation");
     } finally {
@@ -93,7 +90,7 @@ export function RecommendationForm() {
 
       {error && <div className={styles.error}>{error}</div>}
       {success && (
-        <div className={styles.success}>Recommendation added to the shelf!</div>
+        <div className={styles.success}>&#10003; Recommendation added!</div>
       )}
 
       <div className={styles.formGroup}>
@@ -104,7 +101,7 @@ export function RecommendationForm() {
           type="text"
           id="title"
           value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          onChange={(e) => { setTitle(e.target.value); setSuccess(false); }}
           placeholder="What are you recommending?"
           className={styles.input}
           maxLength={200}
@@ -119,7 +116,7 @@ export function RecommendationForm() {
         <select
           id="genre"
           value={genre}
-          onChange={(e) => setGenre(e.target.value as Genre)}
+          onChange={(e) => { setGenre(e.target.value as Genre); setSuccess(false); }}
           className={styles.select}
           disabled={isSubmitting}
         >
@@ -139,7 +136,7 @@ export function RecommendationForm() {
           type="url"
           id="link"
           value={link}
-          onChange={(e) => setLink(e.target.value)}
+          onChange={(e) => { setLink(e.target.value); setSuccess(false); }}
           placeholder="https://..."
           className={styles.input}
           maxLength={2000}
@@ -154,7 +151,7 @@ export function RecommendationForm() {
         <textarea
           id="blurb"
           value={blurb}
-          onChange={(e) => setBlurb(e.target.value)}
+          onChange={(e) => { setBlurb(e.target.value); setSuccess(false); }}
           placeholder="Tell us what makes this worth the hype..."
           className={styles.textarea}
           rows={4}

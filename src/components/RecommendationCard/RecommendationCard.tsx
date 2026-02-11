@@ -122,9 +122,11 @@ export function RecommendationCard({
         <p className={styles.blurb}>{recommendation.blurb}</p>
       </div>
 
-      {showUserInfo && (
+      {(showUserInfo || (showActions && (canDelete || canToggle))) && (
         <div className={styles.footer}>
-          <span className={styles.date}>{formatDate(recommendation.createdAt)}</span>
+          {showUserInfo && (
+            <span className={styles.date}>{formatDate(recommendation.createdAt)}</span>
+          )}
 
           {showActions && (canDelete || canToggle) && (
             <div className={styles.actions}>

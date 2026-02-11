@@ -1,12 +1,35 @@
-.recommendationsSection {
+.section {
   width: 100%;
+  margin-top: 2rem;
+  padding: 32px;}
+  
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .sectionTitle {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1a202c;
-  margin-bottom: 1rem;
+  margin: 0;
+}
+
+.countBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 999px;
 }
 
 .grid {

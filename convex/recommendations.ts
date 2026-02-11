@@ -184,6 +184,29 @@ export const deleteRecommendation = mutation({
  * Security: Admin only.
  * Returns the new isStaffPick value.
  */
+/**
+ * Get the current user's own recommendations.
+ * Requires authentication.
+ * Returns up to 50 results sorted by creation date (newest first).
+ */
+export const getMyRecommendations = query({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    const recommendations = await ctx.db
+      .query("recommendations")
+      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .order("desc")
+      .take(MAX_QUERY_LIMIT);
+
+    return recommendations;
+  },
+});
+
 export const toggleStaffPick = mutation({
   args: { id: v.id("recommendations") },
   handler: async (ctx, args) => {

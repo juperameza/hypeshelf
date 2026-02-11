@@ -115,6 +115,9 @@
   display: block;
   margin-bottom: 0.5rem;
   transition: color 0.2s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &:hover {
     color: #667eea;
