@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as rateLimitHelper from "../rateLimitHelper.js";
 import type * as recommendations from "../recommendations.js";
 import type * as users from "../users.js";
 
@@ -18,6 +19,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  rateLimitHelper: typeof rateLimitHelper;
   recommendations: typeof recommendations;
   users: typeof users;
 }>;

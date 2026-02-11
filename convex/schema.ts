@@ -32,4 +32,10 @@ export default defineSchema({
     email: v.string(),
     name: v.string(),
   }).index("by_clerk_id", ["clerkId"]),
+
+  rateLimits: defineTable({
+    userId: v.string(),
+    endpoint: v.string(),
+    timestamps: v.array(v.number()),
+  }).index("by_user_endpoint", ["userId", "endpoint"]),
 });

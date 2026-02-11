@@ -2,6 +2,7 @@
 
 import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useSyncUser } from "../../hooks/useSyncUser";
 import styles from "./Header.module.scss";
 
@@ -9,9 +10,11 @@ interface HeaderProps {
   showUserButton?: boolean;
 }
 
-export function Header({ showUserButton = false }: HeaderProps) {
+export function Header({ showUserButton = true }: HeaderProps) {
   // Sync user to Convex when authenticated
   useSyncUser();
+  const pathname = usePathname();
+  const isDashboardRoute = pathname?.startsWith("/dashboard");
 
   return (
     <header className={styles.header}>
@@ -32,9 +35,11 @@ export function Header({ showUserButton = false }: HeaderProps) {
           </SignedOut>
 
           <SignedIn>
-            <Link href="/dashboard" className={styles.dashboardLink}>
-              Dashboard
-            </Link>
+            {!isDashboardRoute && (
+              <Link href="/dashboard" className={styles.dashboardLink}>
+                Add Recommendation
+              </Link>
+            )}
             {showUserButton && <UserButton afterSignOutUrl="/" />}
           </SignedIn>
         </nav>

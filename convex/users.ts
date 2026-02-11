@@ -1,21 +1,31 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { enforceRateLimit } from "./rateLimitHelper";
 
 /**
  * Sync user from Clerk to Convex database.
  * Called on user sign-up/sign-in to ensure user exists in our database.
  * Sets default role to "user" for new users.
+ * Derives clerkId from auth identity — never trusts client-supplied values.
  */
 export const syncUser = mutation({
   args: {
-    clerkId: v.string(),
     email: v.string(),
     name: v.string(),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("You must be logged in to sync user data");
+    }
+
+    const clerkId = identity.subject;
+
+    await enforceRateLimit(ctx, clerkId, "syncUser", 5, 60_000);
+
     const existingUser = await ctx.db
       .query("users")
-      .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))
+      .withIndex("by_clerk_id", (q) => q.eq("clerkId", clerkId))
       .first();
 
     if (existingUser) {
@@ -29,7 +39,7 @@ export const syncUser = mutation({
 
     // Create new user with default "user" role
     const userId = await ctx.db.insert("users", {
-      clerkId: args.clerkId,
+      clerkId,
       email: args.email,
       name: args.name,
       role: "user",
@@ -63,10 +73,16 @@ export const getCurrentUserRole = query({
 /**
  * Get user by Clerk ID.
  * Used internally for permission checks.
+ * Requires authentication.
  */
 export const getUserByClerkId = query({
   args: { clerkId: v.string() },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("You must be logged in to query user data");
+    }
+
     return await ctx.db
       .query("users")
       .withIndex("by_clerk_id", (q) => q.eq("clerkId", args.clerkId))

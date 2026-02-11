@@ -17,7 +17,6 @@ export function useSyncUser() {
   useEffect(() => {
     if (isLoaded && user) {
       syncUser({
-        clerkId: user.id,
         email: user.primaryEmailAddress?.emailAddress ?? "",
         name: user.fullName ?? user.firstName ?? "Anonymous",
       });

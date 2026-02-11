@@ -36,8 +36,16 @@ export function RecommendationForm() {
       setError("Title is required");
       return;
     }
+    if (title.length > 200) {
+      setError(`Title is too long (${title.length}/200 characters)`);
+      return;
+    }
     if (!link.trim()) {
       setError("Link is required");
+      return;
+    }
+    if (link.length > 2000) {
+      setError(`Link is too long (${link.length}/2000 characters)`);
       return;
     }
     if (!validateUrl(link)) {
@@ -46,6 +54,10 @@ export function RecommendationForm() {
     }
     if (!blurb.trim()) {
       setError("Blurb is required - tell us why you're hyped!");
+      return;
+    }
+    if (blurb.length > 1000) {
+      setError(`Blurb is too long (${blurb.length}/1000 characters)`);
       return;
     }
 
@@ -95,6 +107,7 @@ export function RecommendationForm() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="What are you recommending?"
           className={styles.input}
+          maxLength={200}
           disabled={isSubmitting}
         />
       </div>
@@ -129,6 +142,7 @@ export function RecommendationForm() {
           onChange={(e) => setLink(e.target.value)}
           placeholder="https://..."
           className={styles.input}
+          maxLength={2000}
           disabled={isSubmitting}
         />
       </div>
@@ -144,6 +158,7 @@ export function RecommendationForm() {
           placeholder="Tell us what makes this worth the hype..."
           className={styles.textarea}
           rows={4}
+          maxLength={1000}
           disabled={isSubmitting}
         />
       </div>

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { enforceRateLimit } from "./rateLimitHelper";
 
 const genreValidator = v.union(
   v.literal("horror"),
@@ -11,6 +12,9 @@ const genreValidator = v.union(
   v.literal("other")
 );
 
+const MAX_QUERY_LIMIT = 50;
+const MAX_ALL_RECOMMENDATIONS = 200;
+
 /**
  * Get public recommendations for the landing page.
  * No authentication required.
@@ -19,7 +23,7 @@ const genreValidator = v.union(
 export const getPublicRecommendations = query({
   args: { limit: v.optional(v.number()) },
   handler: async (ctx, args) => {
-    const limit = args.limit ?? 10;
+    const limit = Math.min(Math.max(1, args.limit ?? 10), MAX_QUERY_LIMIT);
 
     const recommendations = await ctx.db
       .query("recommendations")
@@ -50,13 +54,13 @@ export const getAllRecommendations = query({
         .query("recommendations")
         .withIndex("by_staff_pick", (q) => q.eq("isStaffPick", true))
         .order("desc")
-        .collect();
+        .take(MAX_ALL_RECOMMENDATIONS);
     } else {
       recommendations = await ctx.db
         .query("recommendations")
         .withIndex("by_creation")
         .order("desc")
-        .collect();
+        .take(MAX_ALL_RECOMMENDATIONS);
     }
 
     // Filter by genre if specified and not "all"
@@ -86,22 +90,38 @@ export const createRecommendation = mutation({
       throw new Error("You must be logged in to create a recommendation");
     }
 
+    await enforceRateLimit(ctx, identity.subject, "createRecommendation", 10, 60_000);
+
     // Validate inputs
     if (!args.title.trim()) {
       throw new Error("Title cannot be empty");
     }
+    if (args.title.length > 200) {
+      throw new Error(`Title is too long (${args.title.length}/200 characters)`);
+    }
     if (!args.blurb.trim()) {
       throw new Error("Blurb cannot be empty");
+    }
+    if (args.blurb.length > 1000) {
+      throw new Error(`Blurb is too long (${args.blurb.length}/1000 characters)`);
     }
     if (!args.link.trim()) {
       throw new Error("Link cannot be empty");
     }
+    if (args.link.length > 2000) {
+      throw new Error(`Link is too long (${args.link.length}/2000 characters)`);
+    }
 
-    // Basic URL validation
+    // URL validation — reject dangerous protocols
+    let parsedUrl: URL;
     try {
-      new URL(args.link);
+      parsedUrl = new URL(args.link);
     } catch {
       throw new Error("Please provide a valid URL");
+    }
+
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      throw new Error("Only http and https URLs are allowed");
     }
 
     const recommendationId = await ctx.db.insert("recommendations", {
@@ -132,6 +152,8 @@ export const deleteRecommendation = mutation({
     if (!identity) {
       throw new Error("You must be logged in to delete a recommendation");
     }
+
+    await enforceRateLimit(ctx, identity.subject, "deleteRecommendation", 10, 60_000);
 
     const recommendation = await ctx.db.get(args.id);
     if (!recommendation) {
@@ -169,6 +191,8 @@ export const toggleStaffPick = mutation({
     if (!identity) {
       throw new Error("You must be logged in to toggle staff pick");
     }
+
+    await enforceRateLimit(ctx, identity.subject, "toggleStaffPick", 20, 60_000);
 
     // Check if user is admin
     const user = await ctx.db
