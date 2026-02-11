@@ -40,7 +40,14 @@ export const metadata: Metadata = {
     title: "HypeShelf",
     description:
       "Collect and share the stuff you're hyped about. A shared recommendations shelf for friends.",
-    images: ["/og.png"],
+    images: [
+      {
+        url: "https://hypeshelf-mu.vercel.app/og.png",
+        width: 1200,
+        height: 630,
+        alt: "HypeShelf",
+      },
+    ],
   },
   icons: {
     icon: "/favicon.ico",
